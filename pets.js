@@ -1,19 +1,19 @@
-'use strict';
+"use strict";
 
-let fs = require('fs');
-let path = require('path');
+let fs = require("fs");
+let path = require("path");
 
 let node = path.basename(process.argv[0]);
 let file = path.basename(process.argv[1]);
 let cmd = process.argv[2];
-let petsPath = path.join("/Users/sjb/GitHub/Galvanize/Q2/fs-pet-shop", "pets.json");
+let pathToPetShop = path.join("/Users/sjb/GitHub/Galvanize/Q2/fs-pet-shop", "pets.json");
 
 switch (cmd) {
   case "read" :
     let index = process.argv[3];
 
     if (!index) {
-      fs.readFile(petsPath, 'utf8', function(err, data) {
+      fs.readFile(pathToPetShop, "utf8", function(err, data) {
         if (err) {
           throw err;
         }
@@ -22,10 +22,9 @@ switch (cmd) {
     } else {
       let indexIncluded = false;
 
-      fs.readFile(petsPath, 'utf8', function(err, data) {
-        if (err) {
-          throw err;
-        }
+      fs.readFile(pathToPetShop, "utf8", function(err, data) {
+        if (err) throw err;
+
         let pets = JSON.parse(data);
         for (let i in pets) {
           if (Number(index) === Number(i)) {
@@ -33,15 +32,16 @@ switch (cmd) {
             indexIncluded = true;
           }
         }
-        if(indexIncluded === false) {
+        if(indexIncluded == false) {
           console.error(`Usage: ${node} ${file} read INDEX`);
           process.exitCode = 1;
         }
       });
     }
     break;
+
   case "create" :
-    fs.readFile(petsPath, 'utf8', function(readErr, data){
+    fs.readFile(pathToPetShop, 'utf8', function(readErr, data){
       if (readErr) {
         throw readErr;
       }
@@ -60,7 +60,7 @@ switch (cmd) {
 
         let petsJSON = JSON.stringify(pets);
 
-        fs.writeFile(petsPath, petsJSON, function(writeErr){
+        fs.writeFile(pathToPetShop, petsJSON, function(writeErr){
           if (writeErr) {
             throw writeErr;
           }
@@ -68,6 +68,7 @@ switch (cmd) {
         });
     });
     break;
+    
   default :
     console.error(`Usage: ${node} ${file} [read | create | update | destroy]`);
     process.exitCode = 1;

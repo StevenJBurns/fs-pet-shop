@@ -1,9 +1,11 @@
-let fs = require("fs");
-let path = require("path");
-let petsPath = path.join(__dirname, "pets.json");
+"use strict";
 
+let fs = require("fs");
 let http = require("http");
+let path = require("path");
+
 let port = process.env.PORT || 8000;
+let petsPath = path.join(__dirname, "pets.json");
 
 let server = http.createServer(function(req, res) {
   if (req.method === "GET" && req.url === "/pets") {
