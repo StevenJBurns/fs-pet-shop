@@ -19,16 +19,16 @@ switch (cmd) {
     break;
 
   case "update" :
-    updatePetRecord();
+    updatePetRecord(process.argv[3]);
     break;
 
   case "destroy" :
-    destroyPetRecord();
+    destroyPetRecord(process.argv[3]);
     break;
 
   default :
     console.error(`Usage: ${node} ${file} [read | create | update | destroy]`);
-    process.exitCode = 1;
+    process.exit(1);
 }
 
 function createPetRecord() {
@@ -69,10 +69,39 @@ function readPetRecord(requestedIndex) {
   });
 }
 
-function updatePetRecord() {
+function updatePetRecord(requestedIndex) {
+  fs.readFile(pathToPetShop, "utf8", (readError, data) => {
+    if (readError) throw readError;
 
+    let selectedPet = {age: Number(process.argv[4]), kind: process.argv[5], name: process.argv[6]};
+    let storedPets = JSON.parse(data);
+
+    if(!selectedPet.age || !selectedPet.kind || !selectedPet.name) {
+      console.error(`Usage: ${node} ${file} update INDEX AGE KIND NAME`);
+      process.exit(1);
+    } else {
+      storedPets[requestedIndex] = selectedPet;
+      fs.writeFile(pathToPetShop, JSON.stringify(storedPets), (writeError) => writeError ? console.error(writeError) : console.log(selectedPet));
+    }
+  });
 }
 
-function destroyPetRecord() {
+function destroyPetRecord(requestedIndex) {
+  fs.readFile(pathToPetShop, "utf8", (readError, data) => {
+    if (readError) throw readError;
 
+    let storedPets = JSON.parse(data);
+
+    for (let pet of storedPets) {
+      if (storedPets[requestedIndex]) {
+        console.log(storedPets[requestedIndex]);
+        storedPets = storedPets.filter((item) => item !== storedPets[requestedIndex]);
+        fs.writeFile(pathToPetShop, JSON.stringify(storedPets), (writeError) => {if(writeError) console.error(writeError)});
+        return;
+      } else {
+        console.error(`Usage: ${node} ${file} destroy INDEX`);
+        process.exit(1);
+      }
+    }
+  });
 }
