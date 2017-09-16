@@ -51,11 +51,9 @@ let server = http.createServer(function(req, res) {
     })
   } else if (req.method === "POST" && req.url === "/pets") {
 
-    let bodyJSON = "";
+    let returnChunk = "";
 
-    req.on("data", function(chunk) {
-      bodyJSON += chunk.toString();
-    })
+    req.on("data", (chunk) => returnChunk += chunk.toString());
 
     req.on("end", function() {
       fs.readFile(petsPath, "utf8", function(err, petsJSON) {
@@ -67,7 +65,7 @@ let server = http.createServer(function(req, res) {
         }
 
         let pets = JSON.parse(petsJSON);
-        let body = JSON.parse(bodyJSON);
+        let body = JSON.parse(returnChunk);
 
         let age = Number.parseInt(body.age);
         let kind = body.kind;
@@ -106,8 +104,8 @@ let server = http.createServer(function(req, res) {
     res.setHeader("Content-Type", "text/plain");
     res.end("Not Found");
   }
-})
+});
 
-server.listen(port, () => console.log("Listening..."));
+server.listen(port, () => console.log(`Listening On Port ${port}`));
 
 module.exports = server
