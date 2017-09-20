@@ -6,43 +6,33 @@ let express = require("express");
 
 let app = express();
 let port = process.env.PORT || 8000;
-let petsPath = path.join(__dirname, "pets.json");
+let pathToPetShop = path.join(__dirname, "pets.json");
 
-app.disable("x-powered-by");
+//app.disable("x-powered-by");
 
-app.get("/pets", function(req, res) {
-  fs.readFile(petsPath, "utf8", function (err, petsJSON) {
-    if(err){
-      console.error(err.stack);
-      res.sendStatus(500);
-    }
-    res.send(JSON.parse(petsJSON));
+app.get("/pets", (req, res) => {
+  fs.readFile(pathToPetShop, "utf8", (readError, data) =>
+    readError ? sendError500(res, readError) : res.status(200).send(JSON.parse(data)));
+});
+
+app.get("/pets/:id", (req, res) => {
+  fs.readFile(pathToPetShop, "utf8", (readError, data) => {
+    if(readError) sendError500(res, readError);
+
+    let id = Number.parseInt(req.params.id);
+    let storedPets = JSON.parse(data);
+
+    id < 0 || id > storedPets.length - 1 || Number.isNaN(id) ? res.sendStatus(404) : res.status(200).send(storedPets[id]);
   });
 });
 
-app.get("/pets/:id", function(req, res){
-  fs.readFile(petsPath, "utf8", function(err, petsJSON) {
-    if(err) {
-      console.error(err.stack);
-      res.sendStatus(500);
-    }
+function sendError500(res, error) {
+  console.error(error);
+  res.status(500).send();
+}
 
-    let id = Number.parseInt(req.params.id);
-    let pets = JSON.parse(petsJSON);
+// app.use((req, res) => res.sendStatus(404));
 
-    if (id < 0 || id >= pets.length || Number.isNaN(id)) {
-      return res.sendStatus(404);
-      }
-
-      res.set("Content-Type", "application/json");
-      res.send(pets[id]);
-  })
-})
-
-app.use(function(req, res) {
-  res.sendStatus(404);
-})
-
-app.listen(port, () => console.log('Listening...'));
+app.listen(port, () => console.log(`Express Server running on port ${port}`));
 
 module.exports = app;

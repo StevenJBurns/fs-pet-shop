@@ -99,7 +99,7 @@ function handlePOST(req, res) {
   });
 }
 
-function handlePut (response, reqURL) {
+function handlePUT (response, reqURL) {
   fs.readFile(pathToPetShop, "utf8", (readError, data) => {
     if (readError) sendError500(res, readError);
 
