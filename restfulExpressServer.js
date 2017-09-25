@@ -1,6 +1,7 @@
 "use strict";
 
 let express = require("express");
+let bodyParser = require("body-parser");
 let path = require("path");
 let fs = require("fs");
 
@@ -8,26 +9,11 @@ let app = express();
 let port = process.env.PORT || 8000;
 let pathToPetShop = path.join(__dirname, "pets.json");
 
-/* The follwing app.use is essentially what body-parser looks like under the hood.
-I attempted this part of Pet-Shop thinking I could emulate that functionality without
-using the body-parser module.  My attempt was close but I am certain I would not have
-accomplished it alone.  This code will remain in this exercise but in the future all
-my code will import and call the body-parser module when using Express for CRUDL
-reference : https://medium.com/@adamzerner/how-bodyparser-works-247897a93b90 */
-app.use((req, res, next) => {
-  var completeChunk = "";
-  req.on("data", (chunk) => completeChunk += chunk);
-  req.on("end", () => {
-    req.rawBody = completeChunk;
-
-    if (completeChunk && completeChunk.indexOf("{") > -1 ) req.body = JSON.parse(completeChunk);
-    next();
-  });
-});
+app.use(bodyParser.json());
 
 app.get("/pets", (req, res, next) => {
   fs.readFile(pathToPetShop, "utf8", (readError, data) =>
-    readError ? res.sendStatus(500) : res.status(200).send(JSON.parse(data)));
+    readError ? res.status(500) : res.status(200).send(JSON.parse(data)));
 });
 
 app.get("/pets/:id", (req, res, next) => {
@@ -53,6 +39,10 @@ app.post("/pets", (req, res, next) => {
   fs.writeFile(pathToPetShop, JSON.stringify(allPets), (writeError) =>
     writeError ? res.sendStatus(500) : res.status(200).send(newPet));
 });
+
+app.patch("/pets/:id", (req, res) => );
+
+app.delete("/pets/:id", (req, res) => );
 
 app.use((req, res) => res.sendStatus(404));
 
