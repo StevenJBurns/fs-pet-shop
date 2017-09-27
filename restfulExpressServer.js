@@ -2,12 +2,17 @@
 
 let express = require("express");
 let bodyParser = require("body-parser");
+let morgan = require("morgan");
 let path = require("path");
 let fs = require("fs");
 
 let app = express();
 let port = process.env.PORT || 8000;
 let pathToPetShop = path.join(__dirname, "pets.json");
+
+app.disable("x-powered-by");
+
+app.use(morgan("short"));
 
 app.use(bodyParser.json());
 
@@ -17,14 +22,14 @@ app.get("/pets", (req, res, next) => {
 });
 
 app.get("/pets/:id", (req, res, next) => {
-  let storedPets, reqID;
+  let storedPets, requestedID;
 
-  isNaN(req.params.id) ? res.sendStatus(400) : reqID = Number.parseInt(req.params.id)
+  isNaN(req.params.id) ? res.sendStatus(400) : requestedID = Number.parseInt(req.params.id)
 
   fs.readFile(pathToPetShop, "utf8", (readError, data) => {
     readError ? res.sendStatus(500) : storedPets = JSON.parse(data);
 
-    (reqID >= 0 && reqID < storedPets.length) ? res.status(200).send(storedPets[reqID]) : next()
+    (requestedID >= 0 && requestedID < storedPets.length) ? res.status(200).send(storedPets[requestedID]) : next()
   });
 });
 
@@ -37,12 +42,43 @@ app.post("/pets", (req, res, next) => {
   (!newPet.age || !newPet.kind || !newPet.name) ? res.sendStatus(400) : allPets.push(newPet)
 
   fs.writeFile(pathToPetShop, JSON.stringify(allPets), (writeError) =>
-    writeError ? res.sendStatus(500) : res.status(200).send(newPet));
+    writeError ? res.status(500) : res.status(200).send(newPet));
 });
 
-app.patch("/pets/:id", (req, res) => );
+app.patch("/pets/:id", (req, res, next) => {
+  let allPets, requestedID;
 
-app.delete("/pets/:id", (req, res) => );
+  isNaN(req.params.id) ? res.sendStatus(400) : requestedID = Number.parseInt(req.params.id)
+
+  fs.readFile(pathToPetShop, "utf8", (readError, data) => {
+    readError ? res.sendStatus(500) : allPets = JSON.parse(data)
+
+    if (requestedID < 0 && requestedID >= allPets.length - 1) next();
+
+    for (let key of ["age", "kind", "name"]) {
+      if (req.body.hasOwnProperty(key)) allPets[requestedID][key] = req.body[key];
+    }
+  });
+
+  fs.writeFile(pathToPetShop, JSON.stringify(allPets), (writeError) =>
+    writeError ? res.sendStatus(500) : res.type("application/json").status(200).send(allPets[requestedID]));
+});
+
+app.delete("/pets/:id", (req, res, next) => {
+  let allPets, requestedID, deletedPet;
+
+  isNaN(req.params.id) ? res.sendStatus(400) : requestedID = Number.parseInt(req.params.id)
+
+  fs.readFile(pathToPetShop, "utf8", (readError, data) => {
+    readError ? res.sendStatus(500) : allPets = JSON.parse(data)
+
+    if (requestedID < 0 && requestedID >= allPets.length - 1) next();
+    deletedPet = allPets.splice(requestedID, 1)[0];
+  });
+
+  fs.writeFile(pathToPetShop, JSON.stringify(allPets), (writeError) =>
+    writeError ? res.sendStatus(500) : res.type("application/json").status(200).send(deletedPet));
+});
 
 app.use((req, res) => res.sendStatus(404));
 

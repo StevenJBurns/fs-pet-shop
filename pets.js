@@ -81,7 +81,8 @@ function updatePetRecord(requestedIndex) {
       process.exit(1);
     } else {
       storedPets[requestedIndex] = selectedPet;
-      fs.writeFile(pathToPetShop, JSON.stringify(storedPets), (writeError) => writeError ? console.error(writeError) : console.log(selectedPet));
+      fs.writeFile(pathToPetShop, JSON.stringify(storedPets), (writeError) =>
+        writeError ? console.error(writeError) : console.log(selectedPet));
     }
   });
 }
