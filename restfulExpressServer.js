@@ -21,7 +21,7 @@ app.use((req, res, next) => {
   let credentials = basicAuth(req);
 
   if (!credentials || credentials.name != "admin" || credentials.pass != "meowmix") {
-    res.set('WWW-Authenticate', 'Basic realm="Required"');
+    res.set("WWW-Authenticate", 'Basic realm="Required"');
     res.sendStatus(401);
   } else {
     return next();
