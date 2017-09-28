@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/gSchool/fs-pet-shop#readme",
   "dependencies": {
+    "basic-auth": "^2.0.0",
     "body-parser": "^1.18.2",
     "express": "^4.15.4",
     "morgan": "^1.8.2",
